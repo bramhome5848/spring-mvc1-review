@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-@WebServlet(name = "frontControllerServletV2", urlPatterns = "/front-controller/v2/*")  // /v1 를 포함한 하위 모든 요청
+@WebServlet(name = "frontControllerServletV2", urlPatterns = "/front-controller/v2/*")  // /v2 를 포함한 하위 모든 요청
 public class FrontControllerServletV2 extends HttpServlet {
 
     private final Map<String, ControllerV2> controllerMap = new HashMap<>();
