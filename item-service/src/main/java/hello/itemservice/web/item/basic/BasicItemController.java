@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
@@ -73,7 +74,7 @@ public class BasicItemController {
      * model.addAttribute("item", item) -> 자동 추가, 생략 가능
      * @ModelAttribute 생략시 model 에 저장되는 name 은 클래스의 첫글자만 소문자로 변경해서 등록(Item -> item)
      */
-    @PostMapping("/add")
+    //@PostMapping("/add")
     public String addItemV3(@ModelAttribute Item items) {
         itemRepository.save(items);
         return "basic/item";
@@ -87,6 +88,39 @@ public class BasicItemController {
     public String addItemV4(Item item) {
         itemRepository.save(item);
         return "basic/item";
+    }
+
+    /**
+     * 상품 등록 문제점 - 새로 고침시 같은 데이터 계속 적재
+     * 웹 브라우저의 새로 고침은 마지막에 서버에 전송(post/add)한 데이터를 다시 전송
+     * 상품 저장 후에 뷰 템플릿이 아닌 상품 상세 화면으로 리다이렉트를 호출
+     * 새로고침을 수행하더라도 리다리엑트로 인한 마지막 호출 내용인 상품 상세 화면인 GET /items/{id} 가 수행
+     */
+
+    /**
+     * PRG - Post/Redirect/Get
+     * "redirect:/basic/items/" + item.getId()
+     -> URL 에 변수를 더해서 사용하는 것은 URL 인코딩이 안되기 때문에 위험
+     -> RedirectAttributes 사용
+     */
+    //@PostMapping("/add")
+    public String addItemV5(Item item) {
+        itemRepository.save(item);
+        return "redirect:/basic/items/" + item.getId();
+    }
+
+    /**
+     * RedirectAttributes
+     -> URL 인코딩을 수행하고, pathVariable, 쿼리 파라미터까지 처리
+     -> pathVariable 바인딩 : {itemId}
+     -> 나머지는 쿼리 파라미터로 처리 : ?status=true
+     */
+    @PostMapping("/add")
+    public String addItemV6(Item item, RedirectAttributes redirectAttributes) {
+        Item savedItem = itemRepository.save(item);
+        redirectAttributes.addAttribute("itemId", savedItem.getId());
+        redirectAttributes.addAttribute("status", true);
+        return "redirect:/basic/items/{itemId}";
     }
 
     @GetMapping("/{itemId}/edit")
